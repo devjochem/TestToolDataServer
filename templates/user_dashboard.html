@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<h1>User Dashboard</h1>
+
+<div class="mb-3">
+  <strong>Your API Key:</strong>
+  <code>{{ api_key }}</code>
+  <form method="post" class="d-inline ms-3"  action="{{ url_for('regenerate_api_key') }}">
+    <button type="submit" class="btn btn-warning btn-sm" >Regenerate</button>
+  </form>
+</div>
+
+<h2 class="mt-4">Recent Test Data</h2>
+{% if data_entries %}
+  <div class="accordion" id="dataAccordion">
+  {% for entry in data_entries %}
+    <div class="accordion-item bg-dark text-light border-secondary">
+      <h2 class="accordion-header" id="heading{{ loop.index }}">
+        <button
+          class="accordion-button collapsed bg-dark text-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapse{{ loop.index }}"
+        >
+          Received at: {{ entry.timestamp }}
+        </button>
+      </h2>
+      <div
+        id="collapse{{ loop.index }}"
+        class="accordion-collapse collapse"
+        data-bs-parent="#dataAccordion"
+      >
+        <div class="accordion-body">
+          <pre class="text-light bg-black p-3 rounded">{{ entry.content | tojson(indent=2) }}</pre>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <p>No test data received yet.</p>
+{% endif %}
+{% endblock %}

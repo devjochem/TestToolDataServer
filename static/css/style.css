@@ -1,0 +1,72 @@
+body {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    color: #eee;  /* make body text light */
+}
+
+.login-container {
+    height: 100vh;
+    padding: 2rem;
+}
+
+.login-card {
+    background-color: rgba(255, 255, 255, 0.1); /* translucent white background */
+    max-width: 400px;
+    width: 100%;
+    border-radius: 12px;
+    animation: slideUp 0.5s ease;
+    color: #eee; /* text inside the card */
+    backdrop-filter: blur(10px); /* frosted glass effect */
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+}
+
+.login-card h2 {
+    color: #f0f0f0;
+}
+
+.form-label {
+    color: #ddd;  /* lighter label color */
+}
+
+/* Form inputs */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+}
+
+.form-control::placeholder {
+    color: #ccc;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.5);
+    border: none;
+}
+
+/* Button */
+.btn-primary {
+    background-color: #6c5ce7;
+    border: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #5a4bcf;
+    transform: scale(1.02);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

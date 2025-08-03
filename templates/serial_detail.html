@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Serial Detail - {{ serial }}{% endblock %}
+
+{% block content %}
+<h1>Test Results for Serial: {{ serial }}</h1>
+<a href="{{ url_for('all_serials') }}" class="btn btn-secondary mb-3">Back to all serials</a>
+
+{% if entries %}
+  {% for entry in entries %}
+  <div class="card mb-3">
+    <div class="card-header">
+      Timestamp: {{ entry.timestamp }}
+    </div>
+    <div class="card-body">
+      <pre>{{ entry.content | tojson(indent=2) }}</pre>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>No test data found for this serial.</p>
+{% endif %}
+{% endblock %}

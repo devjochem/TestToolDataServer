@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Admin - All User Data{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Admin: All Test Data from Users</h1>
+
+{% if all_data %}
+<div class="accordion" id="adminDataAccordion">
+  {% for entry in all_data %}
+  <div class="accordion-item bg-dark text-light border-secondary">
+    <h2 class="accordion-header" id="heading{{ loop.index }}">
+      <button
+        class="accordion-button collapsed bg-dark text-light"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapse{{ loop.index }}"
+      >
+        {{ entry.user.username }} - {{ entry.serial_number or 'No Serial' }} - {{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+      </button>
+    </h2>
+    <div
+      id="collapse{{ loop.index }}"
+      class="accordion-collapse collapse"
+      data-bs-parent="#adminDataAccordion"
+    >
+      <div class="accordion-body">
+        <strong>User:</strong> {{ entry.user.username }}<br>
+        <strong>Serial:</strong> {{ entry.serial_number or 'N/A' }}<br>
+        <strong>Timestamp:</strong> {{ entry.timestamp }}<br>
+        <pre class="bg-black text-light p-3 rounded">{{ entry.content | tojson(indent=2) }}</pre>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+  <p>No data has been submitted by any user yet.</p>
+{% endif %}
+{% endblock %}

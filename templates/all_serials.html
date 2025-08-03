@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}All Serials{% endblock %}
+
+{% block content %}
+<h1>All Serial Numbers</h1>
+<ul class="list-group">
+  {% for serial, entries in serials %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <a href="{{ url_for('serial_detail', serial=serial) }}">{{ serial }}</a>
+      <span class="badge bg-primary rounded-pill">{{ entries|length }}</span>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

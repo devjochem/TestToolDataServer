@@ -40,11 +40,9 @@ def login():
 
         user = User.query.filter_by(username=uname).first()
         if user and user.check_password(pwd):
-            # Password correct, log in user
             session['user_id'] = user.id
             return redirect(url_for('user_dashboard'))
         else:
-            # Invalid credentials
             flash('Invalid username or password')
             return redirect(url_for('login'))
     return render_template('login.html')
@@ -58,10 +56,13 @@ def admin_dashboard():
         uname = request.form['username']
         pwd = request.form['password']
         if uname and pwd:
-            new_user = User(username=uname, api_key=generate_api_key())
+            new_user = User(username=uname)
             new_user.set_password(pwd)
+            api_key = generate_api_key()
+            new_user.set_api_key(api_key)
             db.session.add(new_user)
             db.session.commit()
+            flash(f'New user created with API key: {api_key}', 'success')
 
     users = User.query.all()
     return render_template('admin_dashboard.html', users=users)
@@ -71,32 +72,43 @@ def admin_view_data():
     if not session.get('admin'):
         return redirect(url_for('login'))
 
-    all_data = APIData.query.order_by(APIData.timestamp.desc()).all()
+    serial_search = request.args.get('serial', '').strip()
+    if serial_search:
+        all_data = APIData.query.filter(APIData.serial_number.ilike(f'%{serial_search}%')).order_by(APIData.timestamp.desc()).all()
+    else:
+        all_data = APIData.query.order_by(APIData.timestamp.desc()).all()
+
     return render_template('admin_data_dashboard.html', all_data=all_data)
 
 
 @app.route('/dashboard')
+@login_required
 def user_dashboard():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
 
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return redirect(url_for('login'))
 
+    serial_search = request.args.get('serial', '').strip()
     data_entries = []
     for data_entry in user.api_data:
         try:
             content = json.loads(data_entry.content)
-        except Exception:
-            content = None
+        except json.JSONDecodeError:
+            continue
+        if serial_search:
+            serial = get_serial_from_content(content)
+            if not serial or serial.lower() != serial_search.lower():
+                continue
         data_entries.append({
             'timestamp': data_entry.timestamp,
             'content': content
         })
 
-    return render_template('user_dashboard.html', data_entries=data_entries, api_key=user.api_key)
+    return render_template('user_dashboard.html', data_entries=data_entries, api_key=session.get('api_key', 'Hidden for security'))
 
 @app.route('/logout')
 def logout():
@@ -110,18 +122,17 @@ def api_receive_data():
     api_key = data.get('api_key')
     content = data.get('content')
 
-    user = User.query.filter_by(api_key=api_key).first()
+    user = User.query.filter(User.api_key_hash.isnot(None)).all()
+    user = next((u for u in user if u.check_api_key(api_key)), None)
     if not user:
         return jsonify({'error': 'Invalid API key'}), 403
 
-    # Extract serial number (assuming it’s in first dict of the list)
     serial_number = None
     if isinstance(content, list):
         first_block = content[0]
         if isinstance(first_block, dict):
             serial_number = first_block.get("Serial")
 
-    # Serialize list content to JSON string
     serialized_content = json.dumps(content)
 
     new_data = APIData(
@@ -136,7 +147,6 @@ def api_receive_data():
 @app.route('/dashboard/all')
 @login_required
 def all_serials():
-    # Admin can see all, normal users see only their own data
     if session.get('admin'):
         all_data = APIData.query.all()
     else:
@@ -146,8 +156,6 @@ def all_serials():
         all_data = APIData.query.filter_by(user_id=user_id).all()
 
     serial_map = {}
-
-    import json
     for entry in all_data:
         try:
             content = json.loads(entry.content)
@@ -162,18 +170,8 @@ def all_serials():
             })
 
     sorted_serials = sorted(serial_map.items(), key=lambda x: x[0])
-
     return render_template('all_serials.html', serials=sorted_serials)
 
-@app.route('/serial/<serial_number>')
-def serial_detail(serial_number):
-    record = SerialData.query.filter_by(serial_number=serial_number).first()
-    if not record:
-        return "Serial not found", 404
-
-    data = record.data  # this is your list-of-dicts structure
-    return render_template('serial_detail.html', data=data, serial=serial_number)
-'''
 @app.route('/dashboard/serial/<serial>')
 def serial_detail(serial):
     if session.get('admin'):
@@ -200,28 +198,29 @@ def serial_detail(serial):
             })
 
     filtered_entries.sort(key=lambda x: x['timestamp'], reverse=True)
-
     return render_template('serial_detail.html', serial=serial, entries=filtered_entries)
-    '''
 
 @app.route('/regenerate_api_key', methods=['POST'])
 def regenerate_api_key():
-    # Assuming you have user info stored in session or similar
     user_id = session.get('user_id')
     if not user_id:
         flash('You must be logged in to regenerate your API key.', 'danger')
         return redirect(url_for('login'))
 
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         flash('User not found.', 'danger')
         return redirect(url_for('login'))
 
-    # Generate a new API key — example uses Python secrets
-    user.api_key = secrets.token_hex(16)
-    db.session.commit()
-    flash('API key regenerated successfully.', 'success')
+    if not request.form.get('confirm'):
+        flash('API key regeneration requires confirmation.', 'danger')
+        return redirect(url_for('user_dashboard'))
 
+    new_api_key = secrets.token_hex(16)
+    user.set_api_key(new_api_key)
+    db.session.commit()
+    session['api_key'] = new_api_key  # Store temporarily for display
+    flash('API key regenerated successfully.', 'success')
     return redirect(url_for('user_dashboard'))
 
 if __name__ == '__main__':

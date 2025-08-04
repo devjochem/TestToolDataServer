@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block title %}Serial Detail - {{ serial }}{% endblock %}
 
 {% block content %}
@@ -9,10 +10,15 @@
   {% for entry in entries %}
   <div class="card mb-3">
     <div class="card-header">
-      Timestamp: {{ entry.timestamp }}
+      <a href="#collapse-{{ loop.index }}" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapse-{{ loop.index }}" class="d-flex justify-content-between align-items-center text-white text-decoration-none">
+        Timestamp: {{ entry.timestamp }}
+        <span class="badge bg-primary text-white rounded-3">Toggle</span>
+      </a>
     </div>
-    <div class="card-body">
-      <pre>{{ entry.content | tojson(indent=2) }}</pre>
+    <div class="collapse" id="collapse-{{ loop.index }}">
+      <div class="card-body">
+        <pre>{{ entry.content | tojson(indent=2) }}</pre>
+      </div>
     </div>
   </div>
   {% endfor %}

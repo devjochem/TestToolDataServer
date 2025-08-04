@@ -1,45 +1,59 @@
 {% extends "base.html" %}
-{% block title %}User Dashboard{% endblock %}
+
+{% block title %}User Dashboard - TestToolDataServer{% endblock %}
 
 {% block content %}
 <h1>User Dashboard</h1>
+<p>
+    <strong>API Key:</strong>
+    <span id="api-key">{{ api_key }}</span>
+    {% if api_key == 'Hidden for security' %}
+        <button type="button" class="btn btn-sm btn-info" onclick="revealApiKey()">Reveal</button>
+    {% endif %}
+</p>
 
-<div class="mb-3">
-  <strong>Your API Key:</strong>
-  <code>{{ api_key }}</code>
-  <form method="post" class="d-inline ms-3"  action="{{ url_for('regenerate_api_key') }}">
-    <button type="submit" class="btn btn-warning btn-sm" >Regenerate</button>
-  </form>
-</div>
+<!-- Regenerate API Key Form -->
+<form method="POST" action="{{ url_for('regenerate_api_key') }}" class="mb-3" id="regenerate-api-form">
+    <input type="hidden" name="confirm" value="true">
+    <button type="submit" class="btn btn-warning" onclick="return confirmRegenerate()">Regenerate API Key</button>
+</form>
 
-<h2 class="mt-4">Recent Test Data</h2>
-{% if data_entries %}
-  <div class="accordion" id="dataAccordion">
-  {% for entry in data_entries %}
-    <div class="accordion-item bg-dark text-light border-secondary">
-      <h2 class="accordion-header" id="heading{{ loop.index }}">
-        <button
-          class="accordion-button collapsed bg-dark text-light"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#collapse{{ loop.index }}"
-        >
-          Received at: {{ entry.timestamp }}
-        </button>
-      </h2>
-      <div
-        id="collapse{{ loop.index }}"
-        class="accordion-collapse collapse"
-        data-bs-parent="#dataAccordion"
-      >
-        <div class="accordion-body">
-          <pre class="text-light bg-black p-3 rounded">{{ entry.content | tojson(indent=2) }}</pre>
-        </div>
-      </div>
+<!-- Search Form -->
+<form method="GET" action="{{ url_for('user_dashboard') }}" class="mb-3">
+    <div class="input-group">
+        <input type="text" id="serial_search" name="serial" class="form-control" placeholder="Search by Serial Number" value="{{ request.args.get('serial', '') }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if request.args.get('serial') %}
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">Clear</a>
+        {% endif %}
     </div>
-  {% endfor %}
-  </div>
-{% else %}
-  <p>No test data received yet.</p>
+</form>
+
+<h1>Data Entries</h1>
+<ul class="list-group">
+    {% for entry in data_entries %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('serial_detail', serial=entry.content[0].Serial) }}">
+                {{ entry.content[0].Serial if entry.content and entry.content[0].Serial else 'N/A' }}
+            </a>
+            <span class="badge bg-primary rounded-pill">1</span>
+        </li>
+    {% endfor %}
+</ul>
+{% if not data_entries %}
+    <p class="text-muted">No data entries found.</p>
 {% endif %}
+
+<script>
+function confirmRegenerate() {
+    if (confirm("Are you sure you want to regenerate your API key? This will invalidate the current key.")) {
+        return confirm("Please confirm again: Regenerating the API key cannot be undone.");
+    }
+    return false;
+}
+
+function revealApiKey() {
+    alert("API key reveal is disabled for security. Regenerate the key to view a new one.");
+}
+</script>
 {% endblock %}

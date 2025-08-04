@@ -1,39 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Admin - All User Data{% endblock %}
+
+{% block title %}Admin Data Dashboard - TestToolDataServer{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Admin: All Test Data from Users</h1>
+<h1>All Data Entries</h1>
 
-{% if all_data %}
-<div class="accordion" id="adminDataAccordion">
-  {% for entry in all_data %}
-  <div class="accordion-item bg-dark text-light border-secondary">
-    <h2 class="accordion-header" id="heading{{ loop.index }}">
-      <button
-        class="accordion-button collapsed bg-dark text-light"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#collapse{{ loop.index }}"
-      >
-        {{ entry.user.username }} - {{ entry.serial_number or 'No Serial' }} - {{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
-      </button>
-    </h2>
-    <div
-      id="collapse{{ loop.index }}"
-      class="accordion-collapse collapse"
-      data-bs-parent="#adminDataAccordion"
-    >
-      <div class="accordion-body">
-        <strong>User:</strong> {{ entry.user.username }}<br>
-        <strong>Serial:</strong> {{ entry.serial_number or 'N/A' }}<br>
-        <strong>Timestamp:</strong> {{ entry.timestamp }}<br>
-        <pre class="bg-black text-light p-3 rounded">{{ entry.content | tojson(indent=2) }}</pre>
-      </div>
+<!-- Search Form -->
+<form method="GET" action="{{ url_for('admin_view_data') }}" class="mb-3">
+    <div class="input-group">
+        <input type="text" id="serial_search" name="serial" class="form-control" placeholder="Search by Serial Number" value="{{ request.args.get('serial', '') }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if request.args.get('serial') %}
+            <a href="{{ url_for('admin_view_data') }}" class="btn btn-secondary">Clear</a>
+        {% endif %}
     </div>
-  </div>
-  {% endfor %}
-</div>
-{% else %}
-  <p>No data has been submitted by any user yet.</p>
+</form>
+
+<ul class="list-group">
+    {% for entry in all_data %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('serial_detail', serial=entry.serial_number) }}">
+                {{ entry.serial_number or 'N/A' }}
+            </a>
+            <span class="badge bg-primary rounded-pill">1</span>
+        </li>
+    {% endfor %}
+</ul>
+{% if not all_data %}
+    <p class="text-muted">No data entries found.</p>
 {% endif %}
 {% endblock %}

@@ -47,6 +47,20 @@ def login():
             return redirect(url_for('login'))
     return render_template('login.html')
 
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    return render_template('create_user.html')
+
+@app.route('/admin/user/<user_id>', methods=['GET', 'POST'])
+def admin_user_info(user_id):
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    return render_template('user_info.html', user_id=user_id)
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
     if not session.get('admin'):

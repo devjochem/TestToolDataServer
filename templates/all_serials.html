@@ -3,12 +3,42 @@
 
 {% block content %}
 <h1>All Serial Numbers</h1>
+
+<form method="get" class="mb-3">
+  <div class="input-group">
+    <input type="text" name="search" class="form-control" placeholder="Search serial..." value="{{ search }}">
+    <button class="btn btn-primary" type="submit">Search</button>
+  </div>
+</form>
+
 <ul class="list-group">
   {% for serial, entries in serials %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{{ url_for('serial_detail', serial=serial) }}">{{ serial }}</a>
+      <a href="{{ url_for('user_dashboard.serial_detail', serial=serial) }}">{{ serial }}</a>
       <span class="badge bg-primary rounded-pill">{{ entries|length }}</span>
     </li>
   {% endfor %}
 </ul>
+
+<nav aria-label="Page navigation">
+  <ul class="pagination mt-3">
+    {% if page > 1 %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('user_dashboard.all_serials', page=page-1, search=search) }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('user_dashboard.all_serials', page=p, search=search) }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+
+    {% if page < total_pages %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('user_dashboard.all_serials', page=page+1, search=search) }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
 {% endblock %}

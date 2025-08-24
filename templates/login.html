@@ -5,7 +5,7 @@
 <div class="login-container d-flex align-items-center justify-content-center">
     <div class="login-card shadow-lg p-4 rounded">
         <h2 class="text-center mb-4">Welcome Back</h2>
-        <form method="POST" action="{{ url_for('login') }}">
+        <form method="POST" action="{{ url_for('app.login') }}">
             <div class="form-group mb-3">
                 <label for="uname" class="form-label">Username</label>
                 <input type="text" class="form-control" id="uname" name="username" required>

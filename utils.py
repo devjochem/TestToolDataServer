@@ -9,7 +9,7 @@ def get_serial_from_content(json_content):
     try:
         first_dict = json_content[0]
         if isinstance(first_dict, dict):
-            return first_dict.get("Serial")
+            return first_dict['Specs']['Serial']
     except Exception:
         return None
     return None

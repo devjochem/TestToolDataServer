@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}User Edit{% endblock %}
+
+{% block content %}
+
+ <h1>Edit User: {{ user.username }}</h1>
+
+    <form method="POST">
+        <label>Username:</label><br>
+        <input type="text" name="username" value="{{ user.username }}"><br><br>
+
+        <label>New Password (leave blank to keep current):</label><br>
+        <input type="password" name="password"><br><br>
+
+        <label>Regenerate API Key?</label>
+        <input type="checkbox" name="regen_api" value="1"><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <p><a href="{{ url_for('admin_dashboard.admin_dashboard') }}">Back to Dashboard</a></p>
+{% endblock %}

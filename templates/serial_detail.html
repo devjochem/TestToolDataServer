@@ -4,7 +4,7 @@
 
 {% block content %}
 <h1>Test Results for Serial: {{ serial }}</h1>
-<a href="{{ url_for('all_serials') }}" class="btn btn-secondary mb-3">Back to all serials</a>
+<a href="{{ url_for('user_dashboard.all_serials') }}" class="btn btn-secondary mb-3">Back to all serials</a>
 
 {% if entries %}
   {% for entry in entries %}

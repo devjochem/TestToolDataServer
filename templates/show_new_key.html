@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Your New API Key - TestToolDataServer{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Your New API Key</h1>
+
+<div class="alert alert-warning">
+    <strong>Important:</strong> This key will only be shown once. 
+    Please copy and store it securely. You will not be able to view it again later.
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ key_name if key_name else "Unnamed Key" }}</h5>
+        <p class="card-text">
+            <code id="api-key">{{ new_key }}</code>
+        </p>
+        <button class="btn btn-outline-primary btn-sm" onclick="copyApiKey()">Copy to Clipboard</button>
+    </div>
+</div>
+
+<a href="{{ url_for('user_dashboard.user_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+
+<script>
+function copyApiKey() {
+    const keyElement = document.getElementById("api-key");
+    const text = keyElement.textContent;
+    navigator.clipboard.writeText(text).then(function() {
+        alert("API key copied to clipboard!");
+    }, function(err) {
+        alert("Failed to copy API key: " + err);
+    });
+}
+</script>
+{% endblock %}

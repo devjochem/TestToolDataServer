@@ -34,7 +34,10 @@ def check_api_key(api_key):
 def api_receive_data():
     data = request.json
     api_key = data.get('api_key')
-    content = data.get('content')
+    name = data.get('name')
+    specs = data.get('specs')
+    serial_number = data.get('serial_number')
+    test_results = data.get('test_results')
 
     # Master API key bypass
     if api_key == MASTER_API_KEY:
@@ -45,19 +48,16 @@ def api_receive_data():
         if not user:
             return jsonify({'error': 'Invalid API key'}), 403
 
-    serial_number = None
-    if isinstance(content, list):
-        first_block = content[0]
-        if isinstance(first_block, dict):
-            serial_number = first_block['Specs']['Serial']
-
-    serialized_content = json.dumps(content)
-
+    serialized_specs = json.dumps(specs)
+    serialized_test_results = json.dumps(test_results)
     new_data = APIData(
         user_id=user.id if user else None,
-        content=serialized_content,
-        serial_number=serial_number
+        serial_number=serial_number,
+        name=name,
+        specs=serialized_specs,
+        test_results=serialized_test_results
     )
+
     db.session.add(new_data)
     db.session.commit()
     return jsonify({'status': 'success'}), 200
@@ -66,6 +66,8 @@ def api_receive_data():
 def battery_receive_data():
     data = request.json
     api_key = data.get('api_key')
+    serial = data.get('serial')
+    test_id = data.get('test_id')
     content = data.get('content')
 
     # Master API key bypass
@@ -77,20 +79,15 @@ def battery_receive_data():
         if not user:
             return jsonify({'error': 'Invalid API key'}), 403
 
-    serial_number = None
-    print(content[0])
-    if isinstance(content, list):
-        first_block = content[0]
-        if isinstance(first_block, dict):
-            serial_number = first_block['Serial']
-
     serialized_content = json.dumps(content)
 
     new_data = BatData(
         user_id=user.id if user else None,
         content=serialized_content,
-        serial_number=serial_number
+        serial_number=serial,
+        test_id=test_id
     )
+
     db.session.add(new_data)
     db.session.commit()
     return jsonify({'status': 'success'}), 200

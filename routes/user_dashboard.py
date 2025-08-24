@@ -131,6 +131,7 @@ def all_serials():
         if serial:
             serial_map.setdefault(serial, []).append({
                 'timestamp': entry.timestamp,
+                'name':'',
                 'content': content,
                 'id': entry.id
             })

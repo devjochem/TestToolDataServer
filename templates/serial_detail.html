@@ -7,21 +7,34 @@
 <a href="{{ url_for('user_dashboard.all_serials') }}" class="btn btn-secondary mb-3">Back to all serials</a>
 
 {% if entries %}
-  {% for entry in entries %}
-  <div class="card mb-3">
+  <label for="entrySelect" class="form-label">Select Test Timestamp:</label>
+  <select class="form-select mb-3" id="entrySelect" onchange="showSelectedEntry()">
+    {% for entry in entries %}
+      <option value="{{ loop.index0 }}">Timestamp: {{ entry.timestamp }}</option>
+    {% endfor %}
+  </select>
+
+  <div id="entryDisplay" class="card">
     <div class="card-header">
-      <a href="#collapse-{{ loop.index }}" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapse-{{ loop.index }}" class="d-flex justify-content-between align-items-center text-white text-decoration-none">
-        Timestamp: {{ entry.timestamp }}
-        <span class="badge bg-primary text-white rounded-3">Toggle</span>
-      </a>
+      <span id="entryTimestamp">{{ entries[0].timestamp }}</span>
     </div>
-    <div class="collapse" id="collapse-{{ loop.index }}">
-      <div class="card-body">
-        <pre>{{ entry.content | tojson(indent=2) }}</pre>
-      </div>
+    <div class="card-body">
+      <pre id="entryContent">{{ entries[0].content | tojson(indent=2) }}</pre>
     </div>
   </div>
-  {% endfor %}
+
+  <script>
+    const entries = {{ entries | tojson }};
+
+    function showSelectedEntry() {
+      const selectedIndex = document.getElementById('entrySelect').value;
+      const entry = entries[selectedIndex];
+
+      document.getElementById('entryTimestamp').innerText = "Timestamp: " + entry.timestamp;
+      document.getElementById('entryContent').innerText = JSON.stringify(entry.content, null, 2);
+    }
+  </script>
+
 {% else %}
   <p>No test data found for this serial.</p>
 {% endif %}

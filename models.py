@@ -43,7 +43,9 @@ class APIKey(db.Model):
 class APIData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    name = db.Column(db.Text, nullable=False)
+    specs = db.Column(db.Text, nullable=False)
+    test_results = db.Column(db.Text, nullable=False)
     serial_number = db.Column(db.String(64), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now(ZoneInfo("Europe/Amsterdam")))
     user = db.relationship('User', backref='data_entries')
